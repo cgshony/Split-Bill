@@ -1,22 +1,44 @@
 from PdfGenerate import PdfReport
-from  utilities import Bill, Flatmate
+from utilities import Bill, Flatmate
 
 
-amount = float(input('Hello! Please enter the bill amount: '))
-period = input('Whet is the bill period? E.g May 2024')
+def get_bill_information():
+    while True:
+        try:
+            amount = float(input('Hello! Please enter the bill amount: '))
+            period = input('Please enter the bill period? (E.g May, 2024) ')
+            return amount, period
+        except ValueError:
+            print("Invalid input. Please enter the values again.")
 
-name1 = input('What is your name? ')
-days_in_house1 = int(input(f'How may days did {name1} stay in the house during this period'))
+def get_flatmate_details(id):
+    name = input(f"What is the name of flatmate {id + 1}? ")
+    days_in_house = int(input(f'How may days did {name} stay in the house during this period '))
+    return Flatmate(name, days_in_house)
 
-name2 = input('What is the name of the other flatmate? ')
-days_in_house2 = int(input(f'How may days did {name1} stay in the house during this period'))
+def main():
+    amount, period = get_bill_information()
+    flatmates = []
 
-bill_total = Bill(amount, period)
-flatmate1 = Flatmate(name1, days_in_house1)
-flatmate2 = Flatmate(name2, days_in_house2)
+    num_flatmates = int(input(f'How many flatmates are in the flat? '))
 
-print(f'{name1} pays: ', flatmate1.pays(bill_total, flatmate2))
-print(f'{name2} pays: ', flatmate2.pays(bill_total, flatmate1))
+    for person in range(num_flatmates):
+        flatmate = get_flatmate_details(person)
+        flatmates.append(flatmate)
 
-pdf_report = PdfReport(filename=f'{bill_total.period}.pdf')
-pdf_report.generate(flatmate1, flatmate2, bill_total)
+    bill_total = Bill(amount, period)
+
+    # Calculate and print each flatmate's share
+    for flatmate in flatmates:
+        amount_due = round(flatmate.pay_due(bill_total, flatmates), 2)
+        print(f'{flatmate.name} pays: ', amount_due)
+
+  # Generate PDF report
+    pdf_report = PdfReport(filename=f'{bill_total.period}.pdf')
+    pdf_report.generatePDF(flatmates, bill_total)
+
+
+if __name__ == "__main__":
+    main()
+
+
