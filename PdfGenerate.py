@@ -1,3 +1,8 @@
+"""
+This module contains the PdfReport class, which generates a PDF report of the
+monthly bill and flatmates' due amounts.
+"""
+
 from fpdf import FPDF
 
 class PdfReport:
@@ -13,7 +18,7 @@ class PdfReport:
         pdf.add_page()
 
         # Optional: Add watermark
-        # pdf.image('sth.png', w=30, h=30)
+        pdf.image('money.png', w=80, h=50)
 
         # Insert title
         pdf.set_font(family='Times', size=24, style='B')
