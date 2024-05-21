@@ -9,6 +9,7 @@ and generates a PDF report as a receipt.
 from PdfGenerate import PdfReport
 from utilities import Bill, Flatmate
 from SQLdatabase import create_database, create_tables, connect_to_database
+from email_send import send_email
 import mysql.connector
 
 def get_bill_information():
@@ -52,6 +53,13 @@ def main():
         flatmate = get_flatmate_details(person)
         flatmates.append(flatmate)
 
+    # List of emails for each flatmate to automatically send them the monthly bill
+    emails = [
+        'shony.alexandrova@gmail.com'
+        #'flatmate2@example.com',
+        #'flatmate3@example.com'
+    ]
+
     bill_total = Bill(amount, period)
     bill_id = bill_total.save(cursor) #save to db
     db.commit()
@@ -67,9 +75,18 @@ def main():
         print(f'{flatmate.name} pays: ', amount_due)
 
 
-  # Generate PDF report
+    # Generate PDF report
     pdf_report = PdfReport(filename=f'{bill_total.period}.pdf')
     pdf_report.generatePDF(flatmates, bill_total)
+
+    #Send an automated email with the generated monthly bill
+    from_email = 'shony.alexandrova@gmail.com'
+
+    for flatmate, email in zip(flatmates, emails):
+        subject = "Your Monthly Bill"
+        body = f"Hello {flatmate.name},\n\nPlease find attached your bill for the period {bill_total.period}.\n\nBest regards,\nYour Flatmates Bill App"
+        send_email(from_email, email, subject, body, pdf_report.filename)
+        print('Email was sent to flatmates!')
 
     cursor.close()
     db.close()
